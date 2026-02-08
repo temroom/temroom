@@ -457,7 +457,7 @@ function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [/* ... */]);
 
   // [핵심] 로그인 정보가 바뀔 때마다 Realtime 구독 설정
   useEffect(() => {
@@ -559,7 +559,7 @@ function App() {
   }, [isLoggedIn, loggedInUserInfo?.uid, loggedInUserInfo?.role]);
 
   const fetchUserInfo = async (uid: string, email: string) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('users')
       .select('*')
       .eq('id', uid)
