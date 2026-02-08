@@ -457,6 +457,7 @@ function App() {
     });
 
     return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [/* ... */]);
 
   // [핵심] 로그인 정보가 바뀔 때마다 Realtime 구독 설정
@@ -556,6 +557,7 @@ function App() {
     return () => {
       if (channelRef.current) supabase.removeChannel(channelRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, loggedInUserInfo?.uid, loggedInUserInfo?.role]);
 
   const fetchUserInfo = async (uid: string, email: string) => {
