@@ -1,0 +1,298 @@
+/* 1. 전체 페이지 레이아웃 */
+.admin-page-container {
+  padding: 20px;
+  max-width: 600px; /* [수정] 800px -> 600px (요청하신 대로 줄임) */
+  min-width: 400px;
+  margin: 0 auto;
+  display: flex;       /* Flex 레이아웃 시작 */
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;    /* 페이지 전체 스크롤 막기 */
+  background-color: #fff; /* 배경색 명시 (선택사항) */
+}
+
+/* 헤더 (고정) */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;      /* 절대 줄어들지 않음 */
+}
+
+.admin-home-btn {
+  background-color: #6a9ceb;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* 탭 버튼 (고정) */
+.admin-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+  flex-shrink: 0;      /* 절대 줄어들지 않음 */
+}
+
+.admin-tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
+.admin-tabs button.active {
+  color: #333;
+  border-bottom: 2px solid #6a9ceb;
+  margin-bottom: -2px;
+}
+
+/* 2. 컨텐츠 영역 (탭 아래 공간 전체) */
+.admin-content {
+  flex: 1;             /* 남은 높이 모두 차지 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;    /* 내부 요소가 넘쳐도 전체 스크롤 안 생김 */
+  min-height: 0;       /* Flex 버그 방지 */
+}
+
+/* 3. 일정 제한 탭 전용 컨테이너 */
+.schedules-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;             /* admin-content의 남은 높이 모두 차지 */
+  overflow: hidden;    /* 내부 스크롤 제어 */
+  min-height: 0;
+}
+
+/* 일정 추가 박스 (고정) */
+.add-schedule-card {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+  flex-shrink: 0;      /* 스크롤할 때 위로 밀려나가지 않음 */
+}
+
+/* 4. [핵심] 스크롤 되는 목록 리스트 */
+/* 빨간 네모 영역이 바로 이곳입니다 */
+.list-container {
+  flex: 1;             /* 남은 공간을 끝까지 차지함 */
+  overflow-y: auto;    /* 내용이 넘치면 여기만 스크롤 생김 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 20px; /* 스크롤 끝부분 여백 */
+  
+  /* 스크롤바 디자인 (크롬/사파리/엣지) */
+  scrollbar-width: thin; 
+}
+
+/* --- 리스트 아이템 스타일 --- */
+.list-item {
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+  flex-shrink: 0;      /* 리스트 아이템 찌그러짐 방지 */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.list-item.expanded {
+  border-color: #6a9ceb;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.list-item-summary {
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.list-item-summary:hover {
+  background-color: #f9f9f9;
+}
+
+.info-left, .info-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.info-right {
+  align-items: flex-end;
+}
+
+/* 배지 */
+.badge {
+  font-size: 0.8em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  width: fit-content;
+  white-space: nowrap;
+}
+.badge.incheon { background-color: #f7a83d; }
+.badge.gyeong { background-color: #72db9e; }
+
+.status-badge {
+  font-size: 0.85em;
+  font-weight: bold;
+}
+.status-badge.pending { color: #f7a83d; }
+.status-badge.approved { color: #6a9ceb; }
+.status-badge.rejected { color: #dc3545; }
+
+/* [추가] 회원 승인 대기 뱃지 (파란 배경) */
+.status-badge.approval-pending {
+  background-color: #007bff;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+
+.list-item-details {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #eee;
+}
+
+.list-item-details p {
+  margin: 5px 0;
+  color: #555;
+  font-size: 0.95em;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: flex-end;
+}
+
+.detail-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+}
+
+.approve-btn { background-color: #6a9ceb; }
+.delete-btn { background-color: #dc3545; }
+
+.user-name { font-weight: bold; font-size: 1.1em; }
+.user-email { color: #888; font-size: 0.9em; }
+.admin-badge {
+  background-color: #333;
+  color: white;
+  font-size: 0.8em;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.promote { background-color: #28a745; }
+.demote { background-color: #ffc107; color: #333 !important; }
+.ban-btn { background-color: #dc3545; }
+
+/* 일정 입력 폼 내부 스타일 */
+.add-schedule-card h3 {
+  margin-top: 0;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.form-row input, .form-row select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  flex: 1;
+}
+
+.add-btn {
+  background-color: #6a9ceb;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.delete-btn-mini {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.no-data-msg {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+
+.frequency-options {
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px dashed #ddd;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.date-range-inputs, .weekly-inputs, .monthly-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.day-selector, .week-day-selector {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+}
+
+.hint {
+  font-size: 0.8em;
+  color: #888;
+}
+
+.applicant-name {
+  font-size: 1em;
+  color: #333;
+  font-weight: bold; 
+}

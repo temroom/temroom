@@ -1,0 +1,482 @@
+/* src/App.css */
+
+/* 기본 설정 및 전체 페이지 스타일 */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5; /* 전체 배경색 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* 최소 높이 설정 */
+}
+
+.App {
+  text-align: center;
+  padding: 20px;
+  max-width: 480px; /* 아이폰 화면 크기 (대략)에 맞춰 최대 너비 제한 */
+  width: 100%; /* 너비는 부모 요소에 맞춤 */
+  margin: 0 auto; /* 중앙 정렬 */
+  background-color: #ffffff; /* 컨테이너 배경색 */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 섹션별 간격 */
+}
+
+/* 헤더 영역 */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.campus-selection {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden; /* 버튼 경계 처리 */
+}
+
+.campus-btn {
+  flex: 1; /* 너비를 균등하게 나눔 */
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.campus-btn:first-child {
+  border-right: 1px solid #ddd; /* 버튼 사이에 구분선 */
+}
+
+/* 인캠 상태일 때 인캠 버튼 활성화 */
+.campus-btn.active-incheon {
+  background-color: #f7a83d; /* 인캠 활성화 색상 (주황) */
+  color: white;
+  font-weight: bold;
+}
+
+/* 인캠 상태일 때 경캠 버튼 비활성화 (인캠 상태의 경캠처럼 보이게) */
+.campus-btn.inactive-incheon {
+  background-color: #f8f8f8;
+  color: #555;
+}
+
+/* 경캠 상태일 때 경캠 버튼 활성화 */
+.campus-btn.active-gyeong {
+  background-color: #72db9e; /* 경캠 활성화 색상 (초록) */
+  color: white;
+  font-weight: bold;
+}
+
+/* 경캠 상태일 때 인캠 버튼 비활성화 (경캠 상태의 인캠처럼 보이게) */
+.campus-btn.inactive-gyeong {
+  background-color: #f8f8f8;
+  color: #555;
+}
+
+
+.login-btn {
+  padding: 10px 20px;
+  background-color: #6a9ceb; /* 기본: 파란색 */
+  color: white;              /* 글자: 흰색 */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.2s;
+  min-width: 90px;
+  box-sizing: border-box;
+}
+
+/* 1. 관리자 or 비로그인 상태 (클릭 가능, 호버 효과 있음) */
+.login-btn:not(.static-mode):hover {
+  background-color: #517ebd; /* 진한 파란색 */
+}
+
+/* 2. 일반 사용자 로그인 상태 (클릭 불가, 호버 없음, 모양은 똑같이) */
+.login-btn.static-mode {
+  background-color: #6a9ceb; /* 색상 변화 없음 (파란색 유지) */
+  color: white;              /* 글자색 유지 */
+  cursor: default;           /* 커서: 기본 화살표 */
+  pointer-events: none;      /* 마우스 이벤트 무시 (클릭X, 호버색상변경X) */
+  opacity: 1;                /* 투명도 유지 */
+}
+
+/* 동아리방 예약 타이틀 */
+h1 {
+  color: #333;
+  font-size: 1.8em;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* 달력 컨테이너 */
+.calendar-container {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
+}
+
+/* 달력 내비게이션 (2025년 5월, 오늘/이전/다음 버튼) */
+.calendar-nav {
+  display: flex;
+  justify-content: space-between; /* 연월은 왼쪽, 버튼 그룹은 오른쪽 */
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
+}
+
+.calendar-nav .current-month-year {
+  /* 2025년 5월 텍스트 스타일 */
+  font-size: 1.2em; /* 좀 더 크게 */
+  font-weight: bold;
+  color: #333;
+}
+
+.calendar-nav-buttons {
+  display: flex;
+  gap: 8px; /* 버튼 사이 간격 */
+}
+
+.calendar-nav-buttons button {
+  background: none;
+  border: 1px solid #ddd; /* 버튼 테두리 */
+  border-radius: 5px;
+  padding: 5px 10px; /* 버튼 패딩 */
+  font-size: 0.9em;
+  cursor: pointer;
+  color: #555;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.calendar-nav-buttons button:hover {
+  background-color: #f0f0f0;
+  border-color: #bbb;
+}
+
+/* "오늘" 버튼 스타일 (더 강조) */
+.calendar-nav-buttons .nav-today-btn {
+    background-color: #6a9ceb; /* 오늘 버튼은 파란색 배경 */
+    color: white;
+    border-color: #6a9ceb;
+}
+
+.calendar-nav-buttons .nav-today-btn:hover {
+    background-color: #517ebd;
+    border-color: #517ebd;
+}
+
+
+/* 달력 요일 및 날짜 그리드 */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* 7개의 요일 컬럼 */
+  gap: 5px; /* 날짜 셀 사이 간격 */
+}
+
+/* 요일 이름 (한글) */
+.day-name {
+  font-weight: bold;
+  color: #888;
+  padding: 5px 0;
+  font-size: 0.85em;
+  text-align: center; /* 중앙 정렬 */
+}
+
+/* 날짜 셀 */
+.date-cell {
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.9em;
+  color: #333;
+  text-align: center; /* 날짜 숫자 중앙 정렬 */
+}
+
+.date-cell:hover {
+  background-color: #f0f0f0;
+}
+
+.date-cell.empty {
+  background-color: transparent; /* 빈 칸은 투명 */
+  cursor: default;
+}
+
+/* 선택된 날짜 색상 (주황) */
+.date-cell.selected-date {
+  background-color: #f7a83d; /* 선택된 날짜 색상 (주황) */
+  color: white;
+  font-weight: bold;
+}
+
+/* 오늘 날짜 색상 (파랑) */
+/* 선택되지 않은 오늘 날짜인 경우에만 적용 */
+.date-cell.today-date {
+  background-color: #6a9ceb; /* 오늘 날짜 색상 (파랑) */
+  color: white;
+  font-weight: bold;
+}
+
+
+/* 액션 버튼 그룹 */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px; /* 버튼 사이 간격 */
+  width: 100%;
+}
+
+.action-buttons button {
+  flex: 1; /* 너비를 균등하게 나눔 */
+  padding: 12px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.my-reservation-btn {
+  background-color: #6a9ceb; /* 내 예약 버튼 색상 (파랑) */
+  color: white;
+}
+.my-reservation-btn:hover {
+  background-color: #517ebd;
+}
+
+.make-reservation-btn {
+  background-color: #f7a83d; /* 예약하기 버튼 색상 (주황) */
+  color: white;
+}
+.make-reservation-btn:hover {
+  background-color: #e09833;
+}
+
+
+/* 시간 표시 컨테이너 (두 줄 막대 및 숫자) */
+.time-display-container {
+  width: 100%;
+  margin-top: 10px; /* 버튼과의 간격 */
+  margin-bottom: 0px; /* 범례와의 간격 */
+  display: flex;
+  flex-direction: column; /* 두 줄을 세로로 나열 */
+  gap: 15px; /* 두 줄 사이의 간격 */
+}
+
+.time-line {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 시간 레이블 */
+.time-labels {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr); /* 16개의 30분 슬롯에 해당하는 16개의 1fr 컬럼 */
+  font-size: 0.8em;
+  color: #777;
+  padding: 0;
+  box-sizing: border-box;
+  margin-bottom: 5px; /* 시간 레이블과 막대 사이 간격 */
+  position: relative;
+}
+
+.time-label {
+  grid-column: span 2; /* 2개의 30분 슬롯 (1시간)에 걸쳐 표시 */
+  text-align: center; /* 기본적으로 해당 2fr 공간 내에서 중앙 정렬 */
+  position: relative;
+}
+
+/* --- 첫 번째 줄 시간 레이블 개별 조절 --- */
+.time-line:nth-child(1) .time-labels .time-label:first-child { /* 8시 */
+  grid-column: 1 / span 1;
+  text-align: left;
+}
+
+.time-line:nth-child(1) .time-labels .time-label:nth-child(2) { /* 9시 */
+  transform: translateX(1px);
+}
+
+.time-line:nth-child(1) .time-labels .time-label:nth-child(3) { /* 10시 */
+  transform: translateX(3px);
+}
+
+.time-line:nth-child(1) .time-labels .time-label:nth-child(4) { /* 11시 */
+  transform: translateX(4px);
+}
+
+.time-line:nth-child(1) .time-labels .time-label:nth-child(5) { /* 12시 */
+  transform: translateX(5px);
+}
+
+.time-line:nth-child(1) .time-labels .time-label:nth-child(6) { /* 13시 */
+  transform: translateX(9px);
+}
+
+.time-line:nth-child(1) .time-labels .time-label:nth-child(7) { /* 14시 */
+  transform: translateX(11px);
+}
+
+.time-line:nth-child(1) .time-labels .time-label:nth-child(8) { /* 15시 */
+  transform: translateX(13px);
+}
+
+.time-line:nth-child(1) .time-labels .time-label:last-child { /* 16시 (첫 번째 줄의 마지막) */
+  grid-column: -1 / span 1;
+  text-align: right;
+}
+
+/* --- 두 번째 줄 시간 레이블 개별 조절 (간격을 더 넓힘) --- */
+.time-line:nth-child(2) .time-labels .time-label:first-child { /* 16시 */
+  grid-column: 1 / span 1;
+  text-align: left;
+}
+
+.time-line:nth-child(2) .time-labels .time-label:nth-child(2) { /* 17시 */
+  transform: translateX(1px); 
+}
+
+.time-line:nth-child(2) .time-labels .time-label:nth-child(3) { /* 18시 */
+  transform: translateX(4px);
+}
+
+.time-line:nth-child(2) .time-labels .time-label:nth-child(4) { /* 19시 */
+  transform: translateX(6px); 
+}
+
+.time-line:nth-child(2) .time-labels .time-label:nth-child(5) { /* 20시 */
+  transform: translateX(8px); 
+}
+
+.time-line:nth-child(2) .time-labels .time-label:nth-child(6) { /* 21시 */
+  transform: translateX(10px);
+}
+
+.time-line:nth-child(2) .time-labels .time-label:nth-child(7) { /* 22시 */
+  transform: translateX(10px); 
+}
+
+.time-line:nth-child(2) .time-labels .time-label:nth-child(8) { /* 23시 */
+  transform: translateX(15px);
+}
+
+.time-line:nth-child(2) .time-labels .time-label:last-child { /* 0시 */
+  grid-column: -1 / span 1;
+  text-align: right;
+}
+
+
+/* 30분 간격 막대 그리드 */
+.reservation-slots {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 2px; /* 막대 사이 간격 */
+}
+
+.status-bar {
+  height: 25px; /* 막대의 높이 */
+  border-radius: 0; /* 막대 모서리 둥글기 제거 */
+}
+
+/* 막대 색상 */
+.status-bar.available {
+  background-color: #72db9e; /* 이용 가능 (초록) */
+}
+.status-bar.in-progress {
+  background-color: #6a9ceb; /* 예약 중 (파랑) */
+}
+.status-bar.unavailable {
+  background-color: #cccccc; /* 이용 불가 (회색) */
+}
+.status-bar.pending {
+  background-color: #f7a83d; /* 승인 대기 (주황) */
+}
+
+/* 범례 */
+.legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px; /* 범례 항목 간 간격 */
+  margin-top: 0px;
+  padding-top: 15px;
+  border-top: 1px solid #eee; /* 구분선 */
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.85em;
+  color: #555;
+  white-space: nowrap; /* 띄어쓰기된 텍스트가 줄바꿈되지 않도록 */
+}
+
+/* 범례의 색상 박스 스타일 */
+.color-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  margin-right: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05); /* 색상 박스 테두리 */
+}
+
+/* 범례 색상 직접 지정 */
+.color-box.available {
+  background-color: #72db9e; /* 이용 가능 (초록) */
+}
+.color-box.in-progress {
+  background-color: #6a9ceb; /* 예약 중 (파랑) */
+}
+.color-box.unavailable {
+  background-color: #cccccc; /* 이용 불가 (회색) */
+}
+.color-box.pending {
+  background-color: #f7a83d; /* 승인 대기 (주황) */
+}
+
+
+/* 반응형 디자인을 위한 미디어 쿼리 (선택 사항이지만 모바일 환경에 유용) */
+@media (max-width: 600px) {
+  .App {
+    padding: 15px;
+    border-radius: 0; /* 모바일에서는 모서리 둥글게 하지 않음 */
+    box-shadow: none; /* 그림자 제거 */
+    min-height: 100vh; /* 화면 전체를 덮도록 */
+    gap: 15px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .campus-selection {
+    width: 100%;
+  }
+
+  .login-btn {
+    width: 100%;
+    min-width: unset; /* 모바일에서는 min-width 해제 */
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}

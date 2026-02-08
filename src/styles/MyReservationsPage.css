@@ -1,0 +1,305 @@
+/* src/styles/MyReservationsPage.css */
+
+.my-reservations-page-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.my-reservations-page {
+  background-color: #fff; /* 흰색 바탕 */
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh; /* 화면 높이에 맞게 */
+  overflow-y: auto; /* 내용 길면 스크롤 */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.my-reservations-page h2 {
+  text-align: center;
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 1.6em;
+  font-weight: bold;
+}
+
+.page-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  cursor: pointer;
+  color: #aaa;
+  line-height: 0.8;
+}
+
+/* --- 탭 네비게이션 스타일 --- */
+.mypage-tabs {
+  display: flex;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 15px;
+}
+
+.mypage-tab {
+  flex: 1; /* 너비 균등 분배 */
+  padding: 12px;
+  background: none;
+  border: none;
+  font-size: 1em;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent; /* 기본 상태는 투명 */
+  margin-bottom: -2px; /* 라인이 겹치도록 */
+}
+
+.mypage-tab.active {
+  color: #333; /* 활성화 시 검정 글씨 */
+  border-bottom: 2px solid #6a9ceb; /* 활성화 시 파란 밑줄 */
+}
+
+.mypage-tab:hover {
+  background-color: #f9f9f9;
+}
+
+/* 탭 컨텐츠 영역 */
+.tab-content {
+  min-height: 200px; /* 탭 전환 시 높이 널뛰기 방지 */
+}
+
+
+/* --- [1] 내 예약 탭 관련 스타일 --- */
+.no-reservations {
+  text-align: center;
+  color: #888;
+  margin-top: 50px;
+}
+
+.reservation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.reservation-item {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.reservation-summary {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  background-color: #fafafa;
+}
+
+.reservation-summary:hover {
+  background-color: #f0f0f0;
+}
+
+/* 캠퍼스 뱃지 */
+.campus-indicator {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8em;
+  color: white;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.campus-indicator.incheon { background-color: #f7a83d; }
+.campus-indicator.gyeong { background-color: #72db9e; }
+
+/* 날짜 시간 텍스트 */
+.reservation-datetime {
+  font-weight: bold;
+  color: #333;
+  font-size: 0.95em;
+  flex-grow: 1;
+  text-align: center;
+}
+
+/* 상태 뱃지 */
+.reservation-status {
+  font-size: 0.85em;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background-color: #eee;
+  color: #555;
+  white-space: nowrap;
+}
+.reservation-status.pending { background-color: #fff3cd; color: #856404; }
+.reservation-status.approved { background-color: #d4edda; color: #155724; }
+.reservation-status.rejected { background-color: #f8d7da; color: #721c24; }
+.reservation-status.cancelled { background-color: #e2e3e5; color: #383d41; }
+
+/* 예약 취소 버튼 영역 */
+.reservation-actions {
+  padding: 10px;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.cancel-button:hover { background-color: #fa5252; }
+
+
+/* --- [2] 회원 정보 탭 관련 스타일 --- */
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 이메일 정보 카드 */
+.profile-info-card {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+
+.profile-info-card label {
+  display: block;
+  font-size: 0.85em;
+  color: #777;
+  margin-bottom: 5px;
+}
+
+.profile-email {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+/* 버튼 목록 컨테이너 */
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 구분선 섹션 */
+.action-section {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+/* 프로필 버튼 공통 스타일 */
+.profile-btn {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  background-color: white;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left; /* 왼쪽 정렬 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+/* 버튼별 글자색 */
+.logout-btn { color: #333; font-weight: bold; }
+.change-pw-btn { color: #007bff; }
+.withdraw-btn { color: #dc3545; border-color: #f8d7da; }
+.withdraw-btn:hover { background-color: #fff5f5; }
+
+/* 인라인 폼 (비밀번호 변경/탈퇴 입력창) */
+.inline-form {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.inline-form input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.inline-form input:focus {
+  border-color: #6a9ceb;
+  outline: none;
+}
+
+.warning-text {
+  color: #dc3545;
+  font-size: 0.9em;
+  margin: 0;
+}
+
+/* 확인/취소 버튼 그룹 */
+.inline-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-btn, .cancel-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  background-color: #6a9ceb;
+  color: white;
+}
+.confirm-btn.danger {
+  background-color: #dc3545; /* 탈퇴 확인은 빨간색 */
+}
+
+.cancel-btn {
+  background-color: #e9ecef;
+  color: #333;
+}

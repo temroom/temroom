@@ -1,0 +1,237 @@
+/* styles/AddUnavailableScheduleModal.css */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 어두운 반투명 배경 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* 다른 모달 위에 표시 */
+}
+
+.modal-content {
+  background-color: #ffffff; /* 흰색 배경 */
+  padding: 35px; /* 패딩 증가 */
+  border-radius: 18px; /* 모서리 더 둥글게 */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); /* 그림자 강화 */
+  width: 90%;
+  max-width: 550px; /* 모달 너비 약간 증가 */
+  position: relative;
+  animation: fadeInScale 0.3s ease-out forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 18px; /* 간격 증가 */
+  border: 1px solid #e0e0e0; /* 얇은 테두리 추가 */
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2.2em; /* 크기 약간 증가 */
+  color: #a0a0a0; /* 부드러운 회색 */
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: #f2f2f2; /* 호버 시 밝은 회색 */
+  color: #777;
+}
+
+.modal-content h2 {
+  text-align: center;
+  color: #333333; /* 진한 회색 */
+  margin-bottom: 25px; /* 마진 증가 */
+  font-size: 1.8em; /* 제목 크기 증가 */
+  font-weight: 700; /* 굵기 강화 */
+}
+
+.form-group {
+  margin-bottom: 18px; /* 간격 증가 */
+  display: flex;
+  flex-direction: column;
+  text-align: left; /* 폼 그룹 내부 텍스트 좌측 정렬 */
+}
+
+.form-group label {
+  font-weight: 600; /* 굵기 강화 */
+  margin-bottom: 10px; /* 라벨과 입력 필드 간격 증가 */
+  color: #444444; /* 진한 회색 */
+  font-size: 1em; /* 폰트 크기 조정 */
+  text-align: left; /* 라벨 텍스트 좌측 정렬 */
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group select,
+.form-group textarea {
+  padding: 12px 15px; /* 패딩 증가 */
+  border: 1px solid #cccccc; /* 테두리 색상 조정 */
+  border-radius: 10px; /* 모서리 둥글게 */
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  text-align: left; /* 입력 필드 텍스트 좌측 정렬 */
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #66b3ff; /* 포커스 시 밝은 파란색 테두리 */
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* 포커스 시 그림자 */
+  outline: none; /* 기본 아웃라인 제거 */
+}
+
+.form-group.date-range,
+.form-group.time-slot {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px; /* 간격 증가 */
+}
+
+.form-group.date-range input,
+.form-group.time-slot input {
+  flex-grow: 1;
+}
+
+.form-group.date-range span,
+.form-group.time-slot span {
+  color: #777777;
+  font-size: 1.2em; /* ~ 기호 크기 증가 */
+  font-weight: 500;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end; /* 버튼들을 오른쪽으로 정렬 */
+  gap: 15px; /* 버튼들 사이 간격 */
+  margin-top: 20px; /* 상단 마진 */
+}
+
+.submit-btn,
+.exit-btn { /* 나가기 버튼 스타일 추가 */
+  padding: 14px 28px; /* 패딩 증가 */
+  border: none;
+  border-radius: 10px; /* 모서리 둥글게 */
+  cursor: pointer;
+  font-size: 1.2em; /* 폰트 크기 증가 */
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* 그림자 강화 */
+  flex-grow: 1; /* 공간을 균등하게 차지하도록 */
+  max-width: 50%; /* 최대 너비 설정 */
+}
+
+.submit-btn {
+  background-color: #3498db; /* 파란색 */
+  color: white;
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+.submit-btn:hover {
+  background-color: #2980b9; /* 호버 시 진한 파란색 */
+  transform: translateY(-3px); /* 약간 위로 이동 */
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4); /* 그림자 강화 */
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* 클릭 시 그림자 변화 */
+}
+
+.exit-btn {
+  background-color: #95a5a6; /* 회색 */
+  color: white;
+  box-shadow: 0 5px 15px rgba(149, 165, 166, 0.3);
+}
+
+.exit-btn:hover {
+  background-color: #7f8c8d; /* 호버 시 진한 회색 */
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(149, 165, 166, 0.4);
+}
+
+.exit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* 반응형 디자인 */
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 25px;
+    margin: 15px;
+    gap: 12px;
+  }
+
+  .modal-content h2 {
+    font-size: 1.6em;
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    font-size: 0.9em;
+    margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 10px 12px;
+    font-size: 0.9em;
+  }
+
+  .form-group.date-range,
+  .form-group.time-slot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .form-group.date-range input,
+  .form-group.time-slot input {
+    width: 100%;
+  }
+
+  .form-group.date-range span,
+  .form-group.time-slot span {
+    display: none; /* 모바일에서 ~ 기호 숨김 */
+  }
+
+  .modal-buttons {
+    flex-direction: column; /* 모바일에서 버튼 세로 정렬 */
+    gap: 10px;
+  }
+
+  .submit-btn,
+  .exit-btn {
+    padding: 12px 20px;
+    font-size: 1.1em;
+    margin-top: 0; /* 개별 버튼 마진 제거 */
+    max-width: 100%; /* 모바일에서 전체 너비 사용 */
+  }
+}

@@ -1,0 +1,53 @@
+.notification-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 300px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 9999;
+  animation: slideDown 0.3s ease-out;
+  color: white;
+  font-weight: bold;
+}
+
+@keyframes slideDown {
+  from { top: -50px; opacity: 0; }
+  to { top: 20px; opacity: 1; }
+}
+
+.notification-toast.info {
+  background-color: #333;
+}
+
+.notification-toast.success {
+  background-color: #28a745; /* 초록색 (승인 등) */
+}
+
+.notification-toast.alert {
+  background-color: #dc3545; /* 빨간색 (거절, 추방 등) */
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 0.95em;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: 10px;
+  opacity: 0.8;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}

@@ -1,0 +1,189 @@
+/* --- 모달 공통 스타일 (로그인/회원가입 모달) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close-x-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #aaa;
+  line-height: 1;
+  padding: 0;
+}
+
+.modal-close-x-btn:hover {
+  color: #333;
+}
+
+.modal-content h2 {
+  text-align: center;
+  color: #333;
+  margin-top: 10px;
+  /* 제목 아래 여백을 줄여서 이메일 입력칸과 가깝게 함 */
+  margin-bottom: 10px; 
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  /* 폼 그룹 간의 간격을 넓혀서 이메일과 비밀번호 사이를 멀어지게 함 */
+  margin-bottom: 15px; 
+}
+
+/* 첫 번째 폼 그룹(이메일)만 위쪽 여백을 없애서 제목에 붙임 */
+.form-group:first-of-type {
+  margin-top: 0;
+}
+
+.form-group label {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #555;
+  /* [수정] 텍스트 왼쪽 정렬 및 꽉 채우기 */
+  width: 100%;
+  text-align: left;
+}
+
+.form-group input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+  transition: border-color 0.2s;
+  /* [수정] input 창 너비 100% */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* [수정] 자동 로그인 그룹 간격 벌리기 */
+.remember-me-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px; /* 기존 -5px에서 15px로 변경하여 간격 확보 */
+  margin-bottom: 10px;
+}
+
+.remember-me-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.remember-me-label {
+  font-size: 0.9em;
+  color: #555;
+  cursor: pointer;
+}
+
+/* 버튼 스타일 */
+.modal-login-btn, .modal-signup-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 10px;
+}
+
+.modal-login-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.modal-signup-btn {
+  background-color: #28a745;
+  box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+}
+
+.modal-signup-btn:hover {
+  background-color: #218838;
+}
+
+/* 모달 푸터 (링크들) */
+.modal-footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  font-size: 0.9em;
+  color: #777;
+  width: 100%;
+  gap: 8px;
+}
+
+.modal-footer p {
+  margin: 0;
+}
+
+/* 링크형 버튼 공통 스타일 */
+.signup-link-btn, .login-link-btn, .reset-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: bold;
+  transition: color 0.2s;
+  margin-left: 5px;
+}
+
+/* 1. 초록색 스타일 (회원가입 모달 내 '로그인' 버튼) */
+.login-link-btn {
+  color: #28a745; /* 초록색 */
+}
+.login-link-btn:hover {
+  color: #218838; /* 호버 시 진한 초록색 */
+}
+
+/* 2. 파란색 스타일 (로그인 모달 내 '이메일로 로그인' & '회원가입') */
+.reset-link-btn, .signup-link-btn {
+  color: #007bff; /* 파란색 */
+}
+
+.reset-link-btn:hover, .signup-link-btn:hover {
+  color: #0056b3; /* 호버 시 진한 파란색 */
+}
