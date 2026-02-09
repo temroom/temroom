@@ -533,14 +533,14 @@ function App() {
 
           // 5. [사용자] 내 예약 상태 변경 (UPDATE)
           if (payload.eventType === 'UPDATE' && payload.new.userId === loggedInUserInfo.uid) {
-            if (payload.old.status === 'pending' && payload.new.status === 'approved') {
+            if (payload.new.status === 'approved') {
                const msg = `✅ 예약이 승인되었습니다! (${payload.new.useDate})`;
                setToastMessage(msg);
                setToastType('success');
                sendSystemNotification('템방 알림', `예약이 승인되었습니다. (${payload.new.useDate})`);
                fetchData();
             }
-            if (payload.old.status === 'pending' && payload.new.status === 'rejected') {
+            if (payload.new.status === 'rejected') {
                const msg = `❌ 예약이 거절되었습니다. (${payload.new.useDate})`;
                setToastMessage(msg);
                setToastType('alert');
