@@ -70,7 +70,6 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({ data,
           <>
             <h2>이용 불가 상세 정보</h2>
             <p><strong>사유:</strong> {(data as UnavailableScheduleData).reason}</p>
-            <p><strong>빈도:</strong> {formatFrequency(data as UnavailableScheduleData)}</p>
             <div className="modal-actions">
               <button className="confirm-btn" onClick={onClose}>확인</button>
             </div>
