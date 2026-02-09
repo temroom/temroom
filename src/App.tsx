@@ -562,7 +562,7 @@ function App() {
 
   const fetchUserInfo = async (uid: string, email: string) => {
     // 1차 시도: 데이터 조회
-    let { data, error } = await supabase
+    let { data } = await supabase
       .from('users')
       .select('*')
       .eq('id', uid)
