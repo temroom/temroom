@@ -42,6 +42,8 @@ const MyReservationsPage: React.FC<MyReservationsPageProps> = ({ onClose, logged
   // 회원 정보 관련 State
   const [isChangingPw, setIsChangingPw] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); // [추가] 비밀번호 확인용 State
+  
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawPassword, setWithdrawPassword] = useState('');
 
@@ -99,6 +101,13 @@ const MyReservationsPage: React.FC<MyReservationsPageProps> = ({ onClose, logged
       alert('비밀번호는 6자 이상이어야 합니다.');
       return;
     }
+    
+    // [추가] 비밀번호 일치 확인 로직
+    if (newPassword !== confirmPassword) {
+      alert('비밀번호가 일치하지 않습니다.\n다시 확인해주세요.');
+      return;
+    }
+
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
       alert('비밀번호 변경 실패: ' + error.message);
@@ -106,10 +115,11 @@ const MyReservationsPage: React.FC<MyReservationsPageProps> = ({ onClose, logged
       alert('비밀번호가 성공적으로 변경되었습니다.');
       setIsChangingPw(false);
       setNewPassword('');
+      setConfirmPassword(''); // 초기화
     }
   };
 
-  // 4. [수정됨] 회원 탈퇴 핸들러 (RPC 사용)
+  // 4. 회원 탈퇴 핸들러 (RPC 사용)
   const handleWithdraw = async () => {
     if (!withdrawPassword) {
       alert('비밀번호를 입력해주세요.');
@@ -129,8 +139,7 @@ const MyReservationsPage: React.FC<MyReservationsPageProps> = ({ onClose, logged
     }
 
     try {
-      // 2) [핵심 수정] 서버 함수(RPC) 호출하여 계정 완전 삭제
-      // 프론트엔드에서 delete()를 여러 번 호출하는 대신, 권한이 있는 서버 함수를 부릅니다.
+      // 2) 서버 함수(RPC) 호출하여 계정 완전 삭제
       const { error: rpcError } = await supabase.rpc('delete_own_account');
 
       if (rpcError) throw rpcError;
@@ -259,9 +268,20 @@ const MyReservationsPage: React.FC<MyReservationsPageProps> = ({ onClose, logged
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                     />
+                    {/* [추가] 비밀번호 확인 입력창 */}
+                    <input 
+                      type="password" 
+                      placeholder="새 비밀번호 확인" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
                     <div className="inline-buttons">
                       <button className="confirm-btn" onClick={handleChangePassword}>변경</button>
-                      <button className="cancel-btn" onClick={() => { setIsChangingPw(false); setNewPassword(''); }}>취소</button>
+                      <button className="cancel-btn" onClick={() => { 
+                        setIsChangingPw(false); 
+                        setNewPassword(''); 
+                        setConfirmPassword(''); // 취소 시 초기화
+                      }}>취소</button>
                     </div>
                   </div>
                 )}

@@ -561,11 +561,28 @@ function App() {
   }, [isLoggedIn, loggedInUserInfo?.uid, loggedInUserInfo?.role]);
 
   const fetchUserInfo = async (uid: string, email: string) => {
-    const { data } = await supabase
+    // 1차 시도: 데이터 조회
+    let { data, error } = await supabase
       .from('users')
       .select('*')
       .eq('id', uid)
       .single();
+    
+    // [추가된 로직] 데이터가 없다면? (회원가입 직후라서 저장 중일 수 있음)
+    if (!data) {
+      console.log("데이터 없음. 회원가입 저장 대기 중... (1초 재시도)");
+      // 1초(1000ms) 동안 기다림
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 2차 시도: 다시 조회
+      const retry = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', uid)
+        .single();
+        
+      data = retry.data;
+    }
     
     if (data) {
       setIsLoggedIn(true);
@@ -576,7 +593,7 @@ function App() {
         uid: uid
       });
     } else {
-      alert('가입이 거절되었거나 존재하지 않는 계정입니다.');
+      //alert('가입이 거절되었거나 존재하지 않는 계정입니다.');
       await supabase.auth.signOut();
       setIsLoggedIn(false);
       setLoggedInUserInfo(null);

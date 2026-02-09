@@ -102,8 +102,9 @@ const SignupModal: React.FC<SignupModalProps> = ({ onClose, onSignupSubmit, onSh
         alert('회원가입은 되었으나 프로필 저장에 실패했습니다.');
       } else {
         alert('회원가입 신청이 완료되었습니다.\n관리자의 승인을 기다려 주세요.');
-        await supabase.auth.signOut();
-        onShowLogin();
+        //await supabase.auth.signOut();
+        //onShowLogin();
+        onClose(); // 모달 닫기
       }
     }
   };
