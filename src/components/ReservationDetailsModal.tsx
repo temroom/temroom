@@ -13,7 +13,7 @@ interface ReservationData {
   campus: '인캠' | '경캠';
   status: 'pending' | 'approved' | 'rejected' | 'cancelled';
   userId: string;
-  submittedAt: string; // ✨ 중요: string으로 통일
+  submittedAt: string; 
 }
 
 interface UnavailableScheduleData {
@@ -27,7 +27,7 @@ interface UnavailableScheduleData {
   weekOfMonth?: number;
   startTime: string;
   endTime: string;
-  createdAt?: string; // ✨ 중요: string으로 통일
+  createdAt?: string;
 }
 
 interface ReservationDetailsModalProps {
@@ -42,11 +42,12 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({ data,
   const isReservation = dataType === 'reservation';
   const isUnavailable = dataType === 'unavailable';
 
-  // 요일 텍스트 변환
+  // 요일 텍스트 변환 (이제 아래에서 사용하므로 에러가 사라집니다)
   const formatFrequency = (schedule: UnavailableScheduleData) => {
     const days = ['일', '월', '화', '수', '목', '금', '토'];
     if (schedule.frequencyType === 'once') return '1회성';
     if (schedule.frequencyType === 'weekly') return `매주 ${days[schedule.dayOfWeek || 0]}요일`;
+    if (schedule.frequencyType === 'monthly_by_week_day') return `매월 ${schedule.weekOfMonth}번째 ${days[schedule.dayOfWeek || 0]}요일`;
     return '반복 일정';
   };
 
@@ -69,6 +70,9 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({ data,
         {isUnavailable && (
           <>
             <h2>이용 불가 상세 정보</h2>
+            {/* [수정됨] 여기서 formatFrequency 함수를 사용했습니다. */}
+            <p><strong>일정 구분:</strong> {formatFrequency(data as UnavailableScheduleData)}</p>
+            <p><strong>시간:</strong> {(data as UnavailableScheduleData).startTime} ~ {(data as UnavailableScheduleData).endTime}</p>
             <p><strong>사유:</strong> {(data as UnavailableScheduleData).reason}</p>
             <div className="modal-actions">
               <button className="confirm-btn" onClick={onClose}>확인</button>
