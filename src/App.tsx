@@ -382,6 +382,16 @@ const MainContent: React.FC<{
         <div className="legend-item"><span className="color-box unavailable"></span> 이용 불가</div>
         <div className="legend-item"><span className="color-box pending"></span> 승인 대기</div>
       </div>
+
+      <p style={{ 
+        textAlign: 'center', 
+        color: '#999', 
+        marginTop: '0px', 
+        fontSize: '0.9em',
+        marginBottom: '0px' 
+      }}>
+        시간 막대를 눌러 예약할 수도 있습니다.
+      </p>
     </>
   );
 };
