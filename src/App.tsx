@@ -411,7 +411,8 @@ const MainContent: React.FC<{
         fontSize: '0.9em',
         marginBottom: '0px' 
       }}>
-        시간 막대를 눌러 예약할 수도 있습니다.
+        시간 막대를 눌러 일정을 예약하거나 <br />
+        일정 세부 정보를 확인할 수 있습니다.
       </p>
 
       {/* ▼ 템방 사용 안내 아코디언 ▼ */}
