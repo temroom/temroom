@@ -105,6 +105,27 @@ const MainContent: React.FC<{
   handleOpenDetailsModal,
   isLoading
 }) => {
+  
+  // ▼ 안내문 아코디언을 위한 State 및 Ref ▼
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const guideRef = useRef<HTMLDivElement>(null);
+
+  const toggleGuide = () => {
+    if (isGuideOpen) {
+      setIsGuideOpen(false);
+      // 접을 때는 화면 맨 위로 부드럽게 스크롤
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setIsGuideOpen(true);
+      // 열 때는 내용이 화면에 그려진 직후에 해당 위치가 최상단으로 오게 스크롤
+      setTimeout(() => {
+        if (guideRef.current) {
+          guideRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  };
+
   const today = new Date();
   const todayDate = today.getDate();
 
@@ -392,6 +413,54 @@ const MainContent: React.FC<{
       }}>
         시간 막대를 눌러 예약할 수도 있습니다.
       </p>
+
+      {/* ▼ 템방 사용 안내 아코디언 ▼ */}
+      <div ref={guideRef} style={{ paddingBottom: '0px', width: '100%', maxWidth: '500px', margin: '0 auto' }}>
+        <div 
+          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+          onClick={toggleGuide}
+        >
+          <span style={{ fontWeight: 'bold', color: 'black', fontSize: '1.05em' }}>템방 사용 안내</span>
+          <span style={{ fontWeight: 'bold', color: '#6a9ceb', fontSize: '1.05em' }}>
+            {isGuideOpen ? '접기▲' : '열기▼'}
+          </span>
+        </div>
+
+        {isGuideOpen && (
+          <div style={{
+            marginTop: '15px', 
+            padding: '20px', 
+            backgroundColor: '#f8f9fa', 
+            borderRadius: '10px',
+            border: '1px solid #eee',
+            fontSize: '0.95em',
+            lineHeight: '1.6',
+            color: '#333',
+            textAlign: 'left'
+          }}>
+            <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <li>신청 승인은 먼저 등록한 등록자에 우선</li>
+              <li>아침모임, 저녁모임, 10시 기도회의 경우는 신청하지 않아도 됩니다.</li>
+              <li>템방을 사용한 이후 뒷처리를 깔끔하게 정리해주시기 바랍니다.</li>
+              <li>
+                <strong>우선순위 순서</strong>
+                <ol style={{ marginTop: '8px', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <li>헌신예배 팀모임</li>
+                  <li>
+                    팀모임/리더모임/부사역팀<br/>
+                    <span style={{ fontSize: '0.85em', color: '#666', display: 'inline-block', marginTop: '2px' }}>
+                      (화요일인 경우 팀모임(1,3주)과 리더모임(2,4주)에, 나머지 요일에는 부사역팀에 우선순위가 있습니다.)
+                    </span>
+                  </li>
+                  <li>양육</li>
+                  <li>과 기도모임 및 기타 모임</li>
+                </ol>
+              </li>
+              <li>기타 문의사항은 대표리더에게 연락주시기 바랍니다.</li>
+            </ul>
+          </div>
+        )}
+      </div>
     </>
   );
 };
@@ -421,11 +490,11 @@ function App() {
   const [selectedItemForDetails, setSelectedItemForDetails] = useState<ReservationData | UnavailableScheduleData | null>(null);
   const [detailsModalType, setDetailsModalType] = useState<'reservation' | 'unavailable' | null>(null);
 
-  // [추가] 토스트 알림 상태
+  // 토스트 알림 상태
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'info' | 'success' | 'alert'>('info');
 
-  // [추가] Realtime 구독 Ref
+  // Realtime 구독 Ref
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   const fetchData = async () => {
@@ -603,7 +672,6 @@ function App() {
         uid: uid
       });
     } else {
-      //alert('가입이 거절되었거나 존재하지 않는 계정입니다.');
       await supabase.auth.signOut();
       setIsLoggedIn(false);
       setLoggedInUserInfo(null);

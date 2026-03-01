@@ -66,9 +66,9 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const [expandedScheduleId, setExpandedScheduleId] = useState<string | null>(null);
 
-  // [수정] 입력 폼 표시 여부 State
+  // 입력 폼 표시 여부 State
   const [showScheduleForm, setShowScheduleForm] = useState(false);
-  // [수정] 현재 수정 중인 일정 ID (null이면 새 추가 모드)
+  // 현재 수정 중인 일정 ID (null이면 새 추가 모드)
   const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
 
   const [newSchedule, setNewSchedule] = useState<UnavailableScheduleData>({
@@ -84,6 +84,51 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
   });
 
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+  // --- 헬퍼 함수: 예약 정렬 (대기중 -> 승인됨 -> 나머지 순, 같은 상태면 최신순) ---
+  const sortReservations = (list: ReservationData[]) => {
+    return list.sort((a, b) => {
+      // 1. 상태 우선순위 점수 매기기
+      const getScore = (status: string) => {
+        if (status === 'pending') return 3;   // 대기중 (가장 위)
+        if (status === 'approved') return 2;  // 승인됨
+        return 1;                             // 거절/취소 (가장 아래)
+      };
+      
+      const scoreA = getScore(a.status);
+      const scoreB = getScore(b.status);
+
+      // 점수가 다르면 점수 높은 순서로 정렬
+      if (scoreA !== scoreB) return scoreB - scoreA;
+      
+      // 점수가 같으면(같은 상태면) 최신순 정렬
+      return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+    });
+  };
+
+  // --- 헬퍼 함수: 유저 정렬 ---
+  const sortUsers = (list: UserData[]) => {
+    return list.sort((a, b) => {
+      const getPriority = (role: string) => {
+        if (role === 'admin') return 0;
+        if (role === 'pending') return 1;
+        return 2;
+      };
+      
+      const pA = getPriority(a.role);
+      const pB = getPriority(b.role);
+
+      if (pA !== pB) return pA - pB;
+
+      if (a.role === 'pending') {
+        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return timeA - timeB;
+      } else {
+        return a.studentInfo.localeCompare(b.studentInfo);
+      }
+    });
+  };
 
   // --- 페이지 로드 시 즉시 데이터 및 권한 확인 ---
   useEffect(() => {
@@ -110,7 +155,11 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
         return;
       }
 
-      if (resResult.data) setReservations(resResult.data as ReservationData[]);
+      // [수정] 가져온 예약 데이터를 정렬해서 State에 저장
+      if (resResult.data) {
+        const sorted = sortReservations(resResult.data as ReservationData[]);
+        setReservations(sorted);
+      }
       
       // 회원 목록 처리 (필터링 + 정렬)
       if (usersResult.data) {
@@ -124,30 +173,6 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
 
     initPage();
   }, [navigate]); 
-
-  // --- 헬퍼 함수: 유저 정렬 ---
-  const sortUsers = (list: UserData[]) => {
-    return list.sort((a, b) => {
-      const getPriority = (role: string) => {
-        if (role === 'admin') return 0;
-        if (role === 'pending') return 1;
-        return 2;
-      };
-      
-      const pA = getPriority(a.role);
-      const pB = getPriority(b.role);
-
-      if (pA !== pB) return pA - pB;
-
-      if (a.role === 'pending') {
-        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return timeA - timeB;
-      } else {
-        return a.studentInfo.localeCompare(b.studentInfo);
-      }
-    });
-  };
 
   const fetchUsers = async () => {
     const { data } = await supabase.from('users').select('*');
@@ -164,7 +189,12 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
     if (!error) { 
       alert('승인되었습니다.'); 
       const { data } = await supabase.from('reservations').select('*').order('submittedAt', { ascending: false });
-      if(data) setReservations(data as ReservationData[]);
+      
+      // [수정] 상태 변경 후 다시 불러올 때도 정렬 적용
+      if(data) {
+        const sorted = sortReservations(data as ReservationData[]);
+        setReservations(sorted);
+      }
       setExpandedResId(null); 
     }
   };
@@ -212,7 +242,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
     }
   };
 
-  // [수정] 일정 저장 핸들러 (추가 & 수정 공용)
+  // 일정 저장 핸들러 (추가 & 수정 공용)
   const handleSaveSchedule = async () => {
     if(!newSchedule.startDate || !newSchedule.reason) return alert('시작 날짜와 사유는 필수입니다.');
     const scheduleToSave = { ...newSchedule };
@@ -232,7 +262,6 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
       error = updateError;
     } else {
       // 추가 모드: INSERT
-      // id는 자동 생성이므로 insert 시 제외
       const { id, ...insertData } = scheduleToSave; 
       const { error: insertError } = await supabase.from('unavailableSchedules').insert([insertData]);
       error = insertError;
@@ -259,7 +288,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
     }
   };
 
-  // [추가] 수정 버튼 클릭 시 폼 채우기
+  // 수정 버튼 클릭 시 폼 채우기
   const handleEditClick = (sch: UnavailableScheduleData) => {
     setNewSchedule(sch);
     setEditingScheduleId(sch.id!);
@@ -268,7 +297,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // [추가] 폼 닫기 및 초기화
+  // 폼 닫기 및 초기화
   const handleCloseScheduleForm = () => {
     setShowScheduleForm(false);
     setEditingScheduleId(null);
@@ -372,11 +401,11 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
         {activeTab === 'schedules' && (
           <div className="schedules-container">
             
-            {/* [수정] 안내 문구 및 추가 버튼 */}
+            {/* 안내 문구 및 추가 버튼 */}
             {!showScheduleForm && (
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <p style={{ color: '#999', fontSize: '0.9em', marginTop: '0', marginBottom: '10px' }}>
-                  매 학기마다 수정 부탁드립니다.
+                  매 학기마다 수정/삭제 부탁드립니다.
                 </p>
                 <button 
                   className="add-btn" 
@@ -500,7 +529,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ loggedInUserInfo }) => {
                       <p><strong>시간:</strong> {sch.startTime} ~ {sch.endTime}</p>
                       
                       <div className="detail-actions">
-                        {/* [수정] 수정 버튼 추가 */}
+                        {/* 수정 버튼 추가 */}
                         <button className="approve-btn" style={{ backgroundColor: '#6a9ceb' }} onClick={() => handleEditClick(sch)}>수정</button>
                         <button className="delete-btn" onClick={() => handleDeleteSchedule(sch.id)}>삭제</button>
                       </div>
