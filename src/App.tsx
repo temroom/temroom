@@ -49,7 +49,7 @@ interface UnavailableScheduleData {
   createdAt?: string;
 }
 
-// [헬퍼 함수] 브라우저 시스템 알림 보내기
+// [헬퍼 함수] 브라우저 시스템 알림 보내기 (로컬 알림)
 const sendSystemNotification = (title: string, body: string) => {
   if (!("Notification" in window)) return;
 
@@ -58,8 +58,22 @@ const sendSystemNotification = (title: string, body: string) => {
       body: body,
       icon: '/favicon.ico',
       vibrate: [200, 100, 200] 
-    }as any);
+    } as any);
   }
+};
+
+// [새로 추가] Base64 암호키 변환 함수 (웹 푸시용)
+const urlBase64ToUint8Array = (base64String: string) => {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 };
 
 const MainContent: React.FC<{
@@ -113,11 +127,9 @@ const MainContent: React.FC<{
   const toggleGuide = () => {
     if (isGuideOpen) {
       setIsGuideOpen(false);
-      // 접을 때는 화면 맨 위로 부드럽게 스크롤
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       setIsGuideOpen(true);
-      // 열 때는 내용이 화면에 그려진 직후에 해당 위치가 최상단으로 오게 스크롤
       setTimeout(() => {
         if (guideRef.current) {
           guideRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -491,12 +503,60 @@ function App() {
   const [selectedItemForDetails, setSelectedItemForDetails] = useState<ReservationData | UnavailableScheduleData | null>(null);
   const [detailsModalType, setDetailsModalType] = useState<'reservation' | 'unavailable' | null>(null);
 
-  // 토스트 알림 상태
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'info' | 'success' | 'alert'>('info');
 
-  // Realtime 구독 Ref
   const channelRef = useRef<RealtimeChannel | null>(null);
+
+  // ▼ [새로 추가] 푸시 알림 구독 및 Supabase 저장 함수 ▼
+  const subscribeToPush = async (userId: string) => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.log('푸시 알림 권한이 거부되었습니다.');
+        return;
+      }
+
+      const publicVapidKey = process.env.REACT_APP_VAPID_PUBLIC_KEY;
+      if (!publicVapidKey) {
+        console.error('VAPID Public Key가 설정되지 않았습니다.');
+        return;
+      }
+
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+        });
+      }
+
+      const subData = JSON.parse(JSON.stringify(subscription));
+
+      const { error } = await supabase.from('push_subscriptions').upsert({
+        user_id: userId,
+        endpoint: subData.endpoint,
+        p256dh: subData.keys.p256dh,
+        auth: subData.keys.auth
+      }, {
+        onConflict: 'endpoint' // endpoint가 겹치면 에러를 내지 않고 새 정보로 덮어씁니다.
+      });
+
+      if (error) {
+        console.error('구독 정보 DB 저장 실패:', error);
+      } else {
+        console.log('✅ 모바일 푸시 알림 설정이 완료되었습니다!');
+      }
+
+    } catch (error) {
+      console.error('푸시 구독 중 오류 발생:', error);
+    }
+  };
+  // ▲ 여기까지 추가 ▲
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -538,11 +598,9 @@ function App() {
 
     return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [/* ... */]);
+  }, []);
 
-  // [핵심] 로그인 정보가 바뀔 때마다 Realtime 구독 설정
   useEffect(() => {
-    // 기존 구독이 있다면 해제
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
@@ -550,26 +608,22 @@ function App() {
 
     if (!isLoggedIn || !loggedInUserInfo) return;
 
-    // Realtime 채널 구독
     const channel = supabase
       .channel('realtime-notifications')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'users' },
         (payload) => {
-          // 1. [관리자] 새로운 가입 신청 (INSERT)
           if (loggedInUserInfo.role === 'admin' && payload.eventType === 'INSERT') {
             if (payload.new.role === 'pending') {
               const msg = '🔔 새로운 회원가입 신청이 있습니다!';
-              setToastMessage(msg); // 앱 내 토스트
+              setToastMessage(msg); 
               setToastType('info');
-              sendSystemNotification('템방 관리자 알림', '새로운 회원가입 신청이 들어왔습니다.'); // 시스템 알림
+              sendSystemNotification('템방 관리자 알림', '새로운 회원가입 신청이 들어왔습니다.'); 
             }
           }
 
-          // 2. [사용자] 내 계정 상태 변경 (UPDATE)
           if (payload.eventType === 'UPDATE' && payload.new.id === loggedInUserInfo.uid) {
-            // 승인됨 (pending -> user)
             if (payload.old.role === 'pending' && payload.new.role === 'user') {
               const msg = '🎉 회원가입이 승인되었습니다! 이제 예약이 가능합니다.';
               setToastMessage(msg);
@@ -578,7 +632,6 @@ function App() {
               
               sendSystemNotification('템방 알림', '회원가입이 승인되었습니다! 이제 예약할 수 있습니다.');
             }
-            // 추방됨
             if (!payload.old.banned_at && payload.new.banned_at) {
               const msg = '🚫 계정이 관리자에 의해 추방되었습니다. 로그아웃됩니다.';
               setToastMessage(msg);
@@ -588,7 +641,6 @@ function App() {
             }
           }
 
-          // 3. [사용자] 가입 거절 (DELETE)
           if (payload.eventType === 'DELETE' && payload.old.id === loggedInUserInfo.uid) {
             const msg = '🚫 회원가입 신청이 거절되었습니다. 계정이 삭제됩니다.';
             setToastMessage(msg);
@@ -602,7 +654,6 @@ function App() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'reservations' },
         (payload) => {
-          // 4. [관리자] 새로운 예약 신청 (INSERT)
           if (loggedInUserInfo.role === 'admin' && payload.eventType === 'INSERT') {
              const msg = '📅 새로운 예약 신청이 들어왔습니다!';
              setToastMessage(msg);
@@ -611,7 +662,6 @@ function App() {
              fetchData(); 
           }
 
-          // 5. [사용자] 내 예약 상태 변경 (UPDATE)
           if (payload.eventType === 'UPDATE' && payload.new.userId === loggedInUserInfo.uid) {
             if (payload.new.status === 'approved') {
                const msg = `✅ 예약이 승인되었습니다! (${payload.new.useDate})`;
@@ -641,20 +691,16 @@ function App() {
   }, [isLoggedIn, loggedInUserInfo?.uid, loggedInUserInfo?.role]);
 
   const fetchUserInfo = async (uid: string, email: string) => {
-    // 1차 시도: 데이터 조회
     let { data } = await supabase
       .from('users')
       .select('*')
       .eq('id', uid)
       .single();
     
-    // [추가된 로직] 데이터가 없다면? (회원가입 직후라서 저장 중일 수 있음)
     if (!data) {
       console.log("데이터 없음. 회원가입 저장 대기 중... (1초 재시도)");
-      // 1초(1000ms) 동안 기다림
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 2차 시도: 다시 조회
       const retry = await supabase
         .from('users')
         .select('*')
@@ -672,6 +718,12 @@ function App() {
         role: data.role,
         uid: uid
       });
+
+      // ▼ [수정된 부분] 관리자인 경우에만 푸시 권한 묻고 구독하기 ▼
+      if (data.role === 'admin') {
+        subscribeToPush(uid);
+      }
+      
     } else {
       await supabase.auth.signOut();
       setIsLoggedIn(false);
