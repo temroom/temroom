@@ -62,7 +62,7 @@ const sendSystemNotification = (title: string, body: string) => {
   }
 };
 
-// [새로 추가] Base64 암호키 변환 함수 (웹 푸시용)
+// Base64 암호키 변환 함수 (웹 푸시용)
 const urlBase64ToUint8Array = (base64String: string) => {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
@@ -74,6 +74,14 @@ const urlBase64ToUint8Array = (base64String: string) => {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
+};
+
+// ▼ [새로 추가] 접속 기기(OS) 판별 함수 ▼
+const getOS = () => {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  if (/iphone|ipad|ipod/.test(userAgent)) return 'ios';
+  if (/android/.test(userAgent)) return 'android';
+  return 'pc';
 };
 
 const MainContent: React.FC<{
@@ -97,8 +105,8 @@ const MainContent: React.FC<{
   navigate: (path: string) => void;
   handleOpenDetailsModal: (item: ReservationData | UnavailableScheduleData, type: 'reservation' | 'unavailable') => void;
   isLoading: boolean;
-  subscribeToPush: (userId: string) => void; // 👈 알림 켜기 함수
-  pushPermission: string; // 👈 알림 허용 상태
+  onNotificationClick: () => void; // 👈 함수명 변경 (구독 전 팝업 처리용)
+  pushPermission: string;
 }> = ({
   selectedCampus,
   handleCampusClick,
@@ -120,11 +128,10 @@ const MainContent: React.FC<{
   navigate,
   handleOpenDetailsModal,
   isLoading,
-  subscribeToPush,
+  onNotificationClick,
   pushPermission
 }) => {
   
-  // ▼ 안내문 아코디언을 위한 State 및 Ref ▼
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const guideRef = useRef<HTMLDivElement>(null);
 
@@ -307,12 +314,12 @@ const MainContent: React.FC<{
           <button className={`campus-btn ${selectedCampus === '인캠' ? 'active-incheon' : 'inactive-gyeong'}`} onClick={handleCampusClick}>인캠</button>
           <button className={`campus-btn ${selectedCampus === '경캠' ? 'active-gyeong' : 'inactive-incheon'}`} onClick={handleCampusClick}>경캠</button>
 
-          {/* ▼ 관리자이면서, 아직 알림 허용을 안 한 사람에게만 버튼 렌더링 ▼ */}
-          {loggedInUserInfo?.role === 'admin' && pushPermission !== 'granted' && (
+          {/* ▼ [수정됨] 승인 대기(pending) 상태가 아닌 '모든 회원'에게 알림 버튼 표시 ▼ */}
+          {loggedInUserInfo && loggedInUserInfo.role !== 'pending' && pushPermission !== 'granted' && (
             <button 
               className="campus-btn" 
               style={{ marginLeft: '10px', backgroundColor: '#ff9800', color: 'white', border: 'none' }}
-              onClick={() => subscribeToPush(loggedInUserInfo.uid!)}
+              onClick={onNotificationClick}
             >
               🔔 알림 켜기
             </button>
@@ -487,6 +494,35 @@ const MainContent: React.FC<{
               </li>
               <li>기타 문의사항은 대표리더에게 연락주시기 바랍니다.</li>
             </ul>
+
+            {/* ▼ [새로 추가] 웹앱 설치 안내 (OS 맞춤형) ▼ */}
+            <div style={{ marginTop: '25px', paddingTop: '15px', borderTop: '1px dashed #ccc' }}>
+              <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#333', fontSize: '1.05em' }}>📲 웹앱(APP) 설치 방법</p>
+              
+              <div style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '8px', fontSize: '0.9em', border: '1px solid #e0e0e0' }}>
+                {/* 기기에 따라 맞춤형 문구 출력 */}
+                {getOS() === 'ios' ? (
+                  <>
+                    <p style={{ margin: '0 0 5px 0' }}><strong>🍎 아이폰 (Safari)</strong></p>
+                    1. 화면 하단의 공유(<strong>⍐</strong>) 버튼 터치<br/>
+                    2. '더보기'를 누르고 <strong>[홈 화면에 추가 ⊞]</strong> 선택
+                  </>
+                ) : getOS() === 'android' ? (
+                  <>
+                    <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷/크롬)</strong></p>
+                    1. 주소창 옆 (또는 하단) 메뉴 버튼 터치<br/>
+                    2. <strong>[홈 화면에 추가]</strong> 또는 <strong>[설치]</strong> 터치
+                  </>
+                ) : (
+                  <>
+                    <p style={{ margin: '0 0 5px 0' }}><strong>💻 PC 브라우저</strong></p>
+                    주소창 우측 끝의 <strong>[앱 설치]</strong> 아이콘 클릭
+                  </>
+                )}
+              </div>
+            </div>
+            {/* ▲ 여기까지 추가/수정 완료 ▲ */}
+
           </div>
         )}
       </div>
@@ -522,23 +558,36 @@ function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'info' | 'success' | 'alert'>('info');
 
-  // ▼ [새로 추가] 현재 알림 권한 상태를 저장하는 변수 ▼
   const [pushPermission, setPushPermission] = useState<NotificationPermission>(
     'Notification' in window ? Notification.permission : 'default'
   );
 
+  // ▼ [새로 추가] 웹앱 설치 안내 모달 상태 ▼
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
-  // ▼ 푸시 알림 구독 및 Supabase 저장 함수 ▼
+  // ▼ [새로 추가] 알림 버튼 클릭 시 실행되는 로직 ▼
+  const handleNotificationClick = () => {
+    // 이미 '홈 화면에 추가'를 통해 단독 앱(Standalone) 모드로 켜져 있는지 확인합니다.
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && (navigator as any).standalone);
+
+    if (isStandalone) {
+      // 이미 앱처럼 설치되어 있다면, 번거로운 안내 창 없이 바로 권한을 요청합니다.
+      subscribeToPush(loggedInUserInfo?.uid!);
+    } else {
+      // 웹 브라우저 상태라면 설치 안내 모달을 띄웁니다.
+      setShowInstallGuide(true);
+    }
+  };
+
   const subscribeToPush = async (userId: string) => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
 
-      // 아이폰 사파리를 위한 권한 요청 (버튼 클릭 시 실행)
       const permission = await Notification.requestPermission();
-      setPushPermission(permission); // 권한 상태 업데이트
+      setPushPermission(permission); 
       
       if (permission !== 'granted') {
         console.log('푸시 알림 권한이 거부되었습니다.');
@@ -742,8 +791,8 @@ function App() {
         uid: uid
       });
 
-      // ▼ 관리자이면서, 이미 권한을 허용한 상태라면 버튼 클릭 없이 자동으로 백그라운드 구독 진행 ▼
-      if (data.role === 'admin' && Notification.permission === 'granted') {
+      // ▼ [수정됨] 관리자뿐만 아니라 일반 회원(user)도 자동 갱신되도록 변경 ▼
+      if ((data.role === 'admin' || data.role === 'user') && Notification.permission === 'granted') {
         subscribeToPush(uid);
       }
       
@@ -858,6 +907,54 @@ function App() {
 
   return (
     <div className="App">
+      {/* ▼ [새로 추가] 웹앱 설치 안내 팝업 모달 ▼ */}
+      {showInstallGuide && (
+        <div className="modal-overlay" style={{ zIndex: 2000 }}>
+          <div className="modal-content" style={{ textAlign: 'center', padding: '25px', maxWidth: '350px' }}>
+            <h3 style={{ marginTop: '0', color: '#333' }}>📲 웹앱 설치 안내</h3>
+            <p style={{ lineHeight: '1.5', fontSize: '0.95em' }}>
+              알림을 받으려면 APP처럼 사용할 수 있도록<br/>
+              <strong>홈 화면에 추가</strong>해야 합니다.
+            </p>
+
+            <div style={{ margin: '20px 0', padding: '15px', backgroundColor: '#f0f4f8', borderRadius: '10px', fontSize: '0.9em', textAlign: 'left', lineHeight: '1.6' }}>
+              {/* 기기에 따라 맞춤형 문구 출력 */}
+              {getOS() === 'ios' ? (
+                <>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>🍎 아이폰 (Safari)</strong></p>
+                  1. 화면 하단의 공유(<strong>⍐</strong>) 버튼 터치<br/>
+                  2. '더보기'를 누르고 <strong>[홈 화면에 추가 ⊞]</strong> 선택
+                </>
+              ) : getOS() === 'android' ? (
+                <>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷/크롬)</strong></p>
+                  1. 주소창 옆 (또는 하단) 메뉴 버튼 터치<br/>
+                  2. <strong>[홈 화면에 추가]</strong> 터치
+                </>
+              ) : (
+                <>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>💻 PC 브라우저</strong></p>
+                  주소창 우측 끝의 <strong>[앱 설치]</strong> 아이콘 클릭
+                </>
+              )}
+            </div>
+
+            <p style={{ fontSize: '0.85em', color: '#888', marginBottom: '20px' }}>
+              [이 방법은 '템방 사용 안내'에도 있습니다.]
+            </p>
+
+            <div className="modal-actions" style={{ display: 'flex', gap: '10px' }}>
+              <button className="cancel-btn" style={{ flex: 1 }} onClick={() => setShowInstallGuide(false)}>닫기</button>
+              {/* 안드로이드 등에서는 바로 권한을 넘길 수 있도록 옵션 제공 */}
+              <button className="confirm-btn" style={{ flex: 1.5 }} onClick={() => {
+                setShowInstallGuide(false);
+                subscribeToPush(loggedInUserInfo?.uid!);
+              }}>설치 완료 (권한 허용)</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 토스트 메시지 */}
       {toastMessage && (
         <NotificationToast 
@@ -929,8 +1026,8 @@ function App() {
             navigate={navigate}
             handleOpenDetailsModal={handleOpenDetailsModal}
             isLoading={isLoading}
-            subscribeToPush={subscribeToPush} // 👈 Props 전달
-            pushPermission={pushPermission}   // 👈 Props 전달
+            onNotificationClick={handleNotificationClick} // 👈 팝업을 띄우는 함수로 변경됨
+            pushPermission={pushPermission}
           />
         } />
         <Route path="/reservation" element={
