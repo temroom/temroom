@@ -97,6 +97,8 @@ const MainContent: React.FC<{
   navigate: (path: string) => void;
   handleOpenDetailsModal: (item: ReservationData | UnavailableScheduleData, type: 'reservation' | 'unavailable') => void;
   isLoading: boolean;
+  subscribeToPush: (userId: string) => void; // 👈 알림 켜기 함수
+  pushPermission: string; // 👈 알림 허용 상태
 }> = ({
   selectedCampus,
   handleCampusClick,
@@ -117,7 +119,9 @@ const MainContent: React.FC<{
   unavailableSchedules,
   navigate,
   handleOpenDetailsModal,
-  isLoading
+  isLoading,
+  subscribeToPush,
+  pushPermission
 }) => {
   
   // ▼ 안내문 아코디언을 위한 State 및 Ref ▼
@@ -302,6 +306,18 @@ const MainContent: React.FC<{
         <div className="campus-selection">
           <button className={`campus-btn ${selectedCampus === '인캠' ? 'active-incheon' : 'inactive-gyeong'}`} onClick={handleCampusClick}>인캠</button>
           <button className={`campus-btn ${selectedCampus === '경캠' ? 'active-gyeong' : 'inactive-incheon'}`} onClick={handleCampusClick}>경캠</button>
+
+          {/* ▼ 관리자이면서, 아직 알림 허용을 안 한 사람에게만 버튼 렌더링 ▼ */}
+          {loggedInUserInfo?.role === 'admin' && pushPermission !== 'granted' && (
+            <button 
+              className="campus-btn" 
+              style={{ marginLeft: '10px', backgroundColor: '#ff9800', color: 'white', border: 'none' }}
+              onClick={() => subscribeToPush(loggedInUserInfo.uid!)}
+            >
+              🔔 알림 켜기
+            </button>
+          )}
+
         </div>
         <button 
           className={`login-btn ${isRegularUser ? 'static-mode' : ''}`} 
@@ -506,16 +522,24 @@ function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'info' | 'success' | 'alert'>('info');
 
+  // ▼ [새로 추가] 현재 알림 권한 상태를 저장하는 변수 ▼
+  const [pushPermission, setPushPermission] = useState<NotificationPermission>(
+    'Notification' in window ? Notification.permission : 'default'
+  );
+
   const channelRef = useRef<RealtimeChannel | null>(null);
 
-  // ▼ [새로 추가] 푸시 알림 구독 및 Supabase 저장 함수 ▼
+  // ▼ 푸시 알림 구독 및 Supabase 저장 함수 ▼
   const subscribeToPush = async (userId: string) => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
 
+      // 아이폰 사파리를 위한 권한 요청 (버튼 클릭 시 실행)
       const permission = await Notification.requestPermission();
+      setPushPermission(permission); // 권한 상태 업데이트
+      
       if (permission !== 'granted') {
         console.log('푸시 알림 권한이 거부되었습니다.');
         return;
@@ -543,7 +567,7 @@ function App() {
         p256dh: subData.keys.p256dh,
         auth: subData.keys.auth
       }, {
-        onConflict: 'endpoint' // endpoint가 겹치면 에러를 내지 않고 새 정보로 덮어씁니다.
+        onConflict: 'endpoint' 
       });
 
       if (error) {
@@ -556,7 +580,6 @@ function App() {
       console.error('푸시 구독 중 오류 발생:', error);
     }
   };
-  // ▲ 여기까지 추가 ▲
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -719,8 +742,8 @@ function App() {
         uid: uid
       });
 
-      // ▼ [수정된 부분] 관리자인 경우에만 푸시 권한 묻고 구독하기 ▼
-      if (data.role === 'admin') {
+      // ▼ 관리자이면서, 이미 권한을 허용한 상태라면 버튼 클릭 없이 자동으로 백그라운드 구독 진행 ▼
+      if (data.role === 'admin' && Notification.permission === 'granted') {
         subscribeToPush(uid);
       }
       
@@ -906,6 +929,8 @@ function App() {
             navigate={navigate}
             handleOpenDetailsModal={handleOpenDetailsModal}
             isLoading={isLoading}
+            subscribeToPush={subscribeToPush} // 👈 Props 전달
+            pushPermission={pushPermission}   // 👈 Props 전달
           />
         } />
         <Route path="/reservation" element={
