@@ -510,7 +510,7 @@ const MainContent: React.FC<{
                 ) : getOS() === 'android' ? (
                   <>
                     <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷/크롬)</strong></p>
-                    1. 주소창 옆 (또는 하단) 메뉴 버튼 터치<br/>
+                    1. 주소창 옆 (또는 하단) 메뉴 버튼(<strong>≡</strong>) 터치<br/>
                     2. <strong>[홈 화면에 추가]</strong> 또는 <strong>[설치]</strong> 터치
                   </>
                 ) : (
@@ -928,7 +928,7 @@ function App() {
               ) : getOS() === 'android' ? (
                 <>
                   <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷/크롬)</strong></p>
-                  1. 주소창 옆 (또는 하단) 메뉴 버튼 터치<br/>
+                  1. 주소창 옆 (또는 하단) 메뉴 버튼(<strong>≡</strong>) 터치<br/>
                   2. <strong>[홈 화면에 추가]</strong> 터치
                 </>
               ) : (
