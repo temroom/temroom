@@ -508,9 +508,9 @@ const MainContent: React.FC<{
                   </>
                 ) : getOS() === 'android' ? (
                   <>
-                    <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷/크롬)</strong></p>
+                    <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성 인터넷)</strong></p>
                     1. 주소창 옆 (또는 하단) 메뉴 버튼(<strong>≡</strong>) 터치<br/>
-                    2. <strong>[홈 화면에 추가]</strong> 또는 <strong>[설치]</strong> 터치
+                    2. 추가(<strong>⊕</strong>) &gt; <strong>[홈 화면]</strong> 터치
                   </>
                 ) : (
                   <>
@@ -931,9 +931,9 @@ function App() {
                 </>
               ) : getOS() === 'android' ? (
                 <>
-                  <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷/크롬)</strong></p>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성 인터넷)</strong></p>
                   1. 주소창 옆 (또는 하단) 메뉴 버튼(<strong>≡</strong>) 터치<br/>
-                  2. <strong>[홈 화면에 추가]</strong> 또는 <strong>[설치]</strong> 터치
+                  2. 추가(<strong>⊕</strong>) &gt; <strong>[홈 화면]</strong> 터치
                 </>
               ) : (
                 <>
@@ -978,7 +978,7 @@ function App() {
                 </>
               ) : getOS() === 'android' ? (
                 <>
-                  <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷)</strong></p>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성 인터넷)</strong></p>
                   1. <strong>메뉴(≡)</strong> &gt; <strong>설정(⚙️)</strong> 터치<br/>
                   2. <strong>[사이트 및 다운로드]</strong> &gt; <strong>[사이트 알림]</strong> &gt; [<strong>⁝</strong>]<br/>
                   3. <strong>[허용 또는 차단된 사이트]</strong>에서 템방 사이트 (<strong>https://temroom.vercel.app</strong>) <strong>[켜기]</strong>
