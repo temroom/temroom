@@ -76,7 +76,7 @@ const urlBase64ToUint8Array = (base64String: string) => {
   return outputArray;
 };
 
-// ▼ [새로 추가] 접속 기기(OS) 판별 함수 ▼
+// 접속 기기(OS) 판별 함수
 const getOS = () => {
   const userAgent = window.navigator.userAgent.toLowerCase();
   if (/iphone|ipad|ipod/.test(userAgent)) return 'ios';
@@ -105,7 +105,7 @@ const MainContent: React.FC<{
   navigate: (path: string) => void;
   handleOpenDetailsModal: (item: ReservationData | UnavailableScheduleData, type: 'reservation' | 'unavailable') => void;
   isLoading: boolean;
-  onNotificationClick: () => void; // 👈 함수명 변경 (구독 전 팝업 처리용)
+  onNotificationClick: () => void;
   pushPermission: string;
 }> = ({
   selectedCampus,
@@ -314,7 +314,7 @@ const MainContent: React.FC<{
           <button className={`campus-btn ${selectedCampus === '인캠' ? 'active-incheon' : 'inactive-gyeong'}`} onClick={handleCampusClick}>인캠</button>
           <button className={`campus-btn ${selectedCampus === '경캠' ? 'active-gyeong' : 'inactive-incheon'}`} onClick={handleCampusClick}>경캠</button>
 
-          {/* ▼ [수정됨] 승인 대기(pending) 상태가 아닌 '모든 회원'에게 알림 버튼 표시 ▼ */}
+          {/* 승인 대기(pending) 상태가 아닌 '모든 회원'에게 알림 버튼 표시 */}
           {loggedInUserInfo && loggedInUserInfo.role !== 'pending' && pushPermission !== 'granted' && (
             <button 
               className="campus-btn" 
@@ -495,12 +495,11 @@ const MainContent: React.FC<{
               <li>기타 문의사항은 대표리더에게 연락주시기 바랍니다.</li>
             </ul>
 
-            {/* ▼ [새로 추가] 웹앱 설치 안내 (OS 맞춤형) ▼ */}
+            {/* 웹앱 설치 안내 (OS 맞춤형) */}
             <div style={{ marginTop: '25px', paddingTop: '15px', borderTop: '1px dashed #ccc' }}>
               <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#333', fontSize: '1.05em' }}>📲 웹앱(APP) 설치 방법</p>
               
               <div style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '8px', fontSize: '0.9em', border: '1px solid #e0e0e0' }}>
-                {/* 기기에 따라 맞춤형 문구 출력 */}
                 {getOS() === 'ios' ? (
                   <>
                     <p style={{ margin: '0 0 5px 0' }}><strong>🍎 아이폰 (Safari)</strong></p>
@@ -521,7 +520,6 @@ const MainContent: React.FC<{
                 )}
               </div>
             </div>
-            {/* ▲ 여기까지 추가/수정 완료 ▲ */}
 
           </div>
         )}
@@ -562,20 +560,17 @@ function App() {
     'Notification' in window ? Notification.permission : 'default'
   );
 
-  // ▼ [새로 추가] 웹앱 설치 안내 모달 상태 ▼
   const [showInstallGuide, setShowInstallGuide] = useState(false);
+  // ▼ [새로 추가] 알림 권한(차단됨) 해제 안내 모달 상태 ▼
+  const [showPermissionGuide, setShowPermissionGuide] = useState(false); 
   const channelRef = useRef<RealtimeChannel | null>(null);
 
-  // ▼ [새로 추가] 알림 버튼 클릭 시 실행되는 로직 ▼
   const handleNotificationClick = () => {
-    // 이미 '홈 화면에 추가'를 통해 단독 앱(Standalone) 모드로 켜져 있는지 확인합니다.
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && (navigator as any).standalone);
 
     if (isStandalone) {
-      // 이미 앱처럼 설치되어 있다면, 번거로운 안내 창 없이 바로 권한을 요청합니다.
       subscribeToPush(loggedInUserInfo?.uid!);
     } else {
-      // 웹 브라우저 상태라면 설치 안내 모달을 띄웁니다.
       setShowInstallGuide(true);
     }
   };
@@ -584,13 +579,24 @@ function App() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     try {
+      // ▼ [수정됨] 차단된 상태이면 팝업 모달을 띄웁니다 ▼
+      if (Notification.permission === 'denied') {
+        setShowPermissionGuide(true);
+        return;
+      }
+
       const registration = await navigator.serviceWorker.register('/sw.js');
 
       const permission = await Notification.requestPermission();
       setPushPermission(permission); 
       
       if (permission !== 'granted') {
-        console.log('푸시 알림 권한이 거부되었습니다.');
+        // ▼ [수정됨] 방금 차단을 눌렀을 때도 팝업 모달을 띄웁니다 ▼
+        if (permission === 'denied') {
+          setShowPermissionGuide(true);
+        } else {
+          console.log('푸시 알림 권한이 거부되었습니다.');
+        }
         return;
       }
 
@@ -791,7 +797,6 @@ function App() {
         uid: uid
       });
 
-      // ▼ [수정됨] 관리자뿐만 아니라 일반 회원(user)도 자동 갱신되도록 변경 ▼
       if ((data.role === 'admin' || data.role === 'user') && Notification.permission === 'granted') {
         subscribeToPush(uid);
       }
@@ -907,7 +912,7 @@ function App() {
 
   return (
     <div className="App">
-      {/* ▼ [새로 추가] 웹앱 설치 안내 팝업 모달 ▼ */}
+      {/* ▼ [기존] 웹앱 설치 안내 팝업 모달 ▼ */}
       {showInstallGuide && (
         <div className="modal-overlay" style={{ zIndex: 2000 }}>
           <div className="modal-content" style={{ textAlign: 'center', padding: '25px', maxWidth: '350px' }}>
@@ -918,7 +923,6 @@ function App() {
             </p>
 
             <div style={{ margin: '20px 0', padding: '15px', backgroundColor: '#f0f4f8', borderRadius: '10px', fontSize: '0.9em', textAlign: 'left', lineHeight: '1.6' }}>
-              {/* 기기에 따라 맞춤형 문구 출력 */}
               {getOS() === 'ios' ? (
                 <>
                   <p style={{ margin: '0 0 5px 0' }}><strong>🍎 아이폰 (Safari)</strong></p>
@@ -929,7 +933,7 @@ function App() {
                 <>
                   <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷/크롬)</strong></p>
                   1. 주소창 옆 (또는 하단) 메뉴 버튼(<strong>≡</strong>) 터치<br/>
-                  2. <strong>[홈 화면에 추가]</strong> 터치
+                  2. <strong>[홈 화면에 추가]</strong> 또는 <strong>[설치]</strong> 터치
                 </>
               ) : (
                 <>
@@ -945,11 +949,53 @@ function App() {
 
             <div className="modal-actions" style={{ display: 'flex', gap: '10px' }}>
               <button className="cancel-btn" style={{ flex: 1 }} onClick={() => setShowInstallGuide(false)}>닫기</button>
-              {/* 안드로이드 등에서는 바로 권한을 넘길 수 있도록 옵션 제공 */}
               <button className="confirm-btn" style={{ flex: 1.5 }} onClick={() => {
                 setShowInstallGuide(false);
                 subscribeToPush(loggedInUserInfo?.uid!);
               }}>설치 완료 (권한 허용)</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ▼ [새로 추가] 알림 권한 '차단' 해제 안내 팝업 모달 ▼ */}
+      {showPermissionGuide && (
+        <div className="modal-overlay" style={{ zIndex: 2000 }}>
+          <div className="modal-content" style={{ textAlign: 'center', padding: '25px', maxWidth: '350px' }}>
+            <h3 style={{ marginTop: '0', color: '#333' }}>🚫 알림 권한 허용 안내</h3>
+            <p style={{ lineHeight: '1.5', fontSize: '0.95em' }}>
+              현재 알림 권한이 <strong>'차단'</strong>되어 있습니다.<br/>
+              알림을 받으시려면 아래 방법에 따라 <strong>직접 허용</strong>해 주셔야 합니다.
+            </p>
+
+            <div style={{ margin: '20px 0', padding: '15px', backgroundColor: '#f0f4f8', borderRadius: '10px', fontSize: '0.9em', textAlign: 'left', lineHeight: '1.6' }}>
+              {getOS() === 'ios' ? (
+                <>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>🍎 아이폰</strong></p>
+                  1. 템방 예약 웹앱 삭제 후 재설치<br/>
+                  (웹앱 설치 방법은 템방 사용 안내를 참고해주세요.)<br/>
+                  2. 템방 예약 웹앱 접속 후 로그인 &gt; <strong>[알림 켜기]</strong> 터치 &gt; <strong>[허용]</strong>
+                </>
+              ) : getOS() === 'android' ? (
+                <>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>🤖 갤럭시 (삼성인터넷)</strong></p>
+                  1. <strong>메뉴(≡)</strong> &gt; <strong>설정(⚙️)</strong> 터치<br/>
+                  2. <strong>[사이트 및 다운로드]</strong> &gt; <strong>[사이트 알림]</strong> &gt; [<strong>⁝</strong>]<br/>
+                  3. <strong>[허용 또는 차단된 사이트]</strong>에서 템방 사이트 (<strong>https://temroom.vercel.app</strong>) <strong>[켜기]</strong>
+                </>
+              ) : (
+                <>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>💻 PC 브라우저</strong></p>
+                  1. 주소창 좌측 <strong>자물쇠(🔒)</strong> 아이콘 클릭<br/>
+                  2. <strong>[알림]</strong> 권한을 <strong>[허용]</strong>으로 변경
+                </>
+              )}
+            </div>
+
+            <div className="modal-actions" style={{ display: 'flex' }}>
+              <button className="confirm-btn" style={{ flex: 1 }} onClick={() => setShowPermissionGuide(false)}>
+                확인했습니다
+              </button>
             </div>
           </div>
         </div>
@@ -1026,7 +1072,7 @@ function App() {
             navigate={navigate}
             handleOpenDetailsModal={handleOpenDetailsModal}
             isLoading={isLoading}
-            onNotificationClick={handleNotificationClick} // 👈 팝업을 띄우는 함수로 변경됨
+            onNotificationClick={handleNotificationClick}
             pushPermission={pushPermission}
           />
         } />
