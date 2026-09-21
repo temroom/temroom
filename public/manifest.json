@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "템방예약",
+  "name": "지아이템 템방 예약",
   "icons": [
     {
       "src": "favicon.ico",
